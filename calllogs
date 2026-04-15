@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 MONDAY=$(date -v +Mon "+%b %d")
 TUESDAY=$(date -v +Tue "+%b %d")
@@ -79,6 +79,9 @@ do
         ;;
         code)
             code "${CALLLOGDIR}"
+        ;;
+        dir)
+            open CALLLOGDIR
         ;;
         debug)
             set -x
