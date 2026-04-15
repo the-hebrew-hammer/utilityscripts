@@ -1,0 +1,87 @@
+#!/bin/bash
+
+MONDAY=$(date -v +Mon "+%b %d")
+TUESDAY=$(date -v +Tue "+%b %d")
+WEDNESDAY=$(date -v +Wed "+%b %d")
+THURSDAY=$(date -v +Thu "+%b %d")
+FRIDAY=$(date -v +Fri "+%b %d")
+CALLLOGDIR="/Users/davidfishman/Documents/Call_Logs/"
+CURRENTDAY=$(date "+%d")
+CURRENTMONTH=$(date "+%m")
+CURRENTYEAR=$(date "+%Y")
+
+function createCallLogs() # create a call log file with a heredoc
+{
+    cat <<EOF > "${CALLLOGDIR}"/"${CURRENTMONTH}-${CURRENTDAY}-${CURRENTYEAR}".txt
+------------------------------ ${MONDAY} ------------------------------
+
+
+
+------------------------------ ${TUESDAY} ------------------------------
+------------------------------ ${WEDNESDAY} ------------------------------
+------------------------------ ${THURSDAY} ------------------------------
+------------------------------ ${FRIDAY} ------------------------------
+EOF
+}
+
+
+function rotateCallLogs() # move all of the call logs with the specified month number into a folder and zip them
+{
+    for file in ${CALLLOGDIR}*
+    do
+
+        file_name=$(basename "${file}")
+
+        if echo "${file_name}" | grep "Call_Logs"
+        then
+            true
+        else
+            file_month=$(echo "${file_name}" | awk -F '-' '{print $1}')
+            if [ "${file_month}" -ne "${CURRENTMONTH}" ] 
+            then
+                mkdir -p "${CALLLOGDIR}Call_Logs_${file_month}-${CURRENTYEAR}/"
+                mv "${file}" "${CALLLOGDIR}Call_Logs_${file_month}-${CURRENTYEAR}"
+            fi
+        fi
+    done
+
+    pushd ${CALLLOGDIR}||exit 1
+    for dir in $(find ${CALLLOGDIR}* -type d )
+    do
+        foldername=$(basename "${dir}")
+        
+        zip -r "${foldername}.zip" "${foldername}"
+        rm -r "${dir}"
+        rm -r "${dir}"
+    done
+    popd||exit 2
+}
+
+function openCallLogs() # open the file in the callogs dir with the most recent created date
+{
+    LATESTLOG=$(ls -Art "${CALLLOGDIR}"*.txt | tail -n 1)
+
+    open -a TextEdit "${LATESTLOG}"
+}
+
+for arg in "$@"
+do
+    case "$arg" in 
+        create)
+            createCallLogs
+            openCallLogs
+        ;;
+        rotate)
+            rotateCallLogs
+        ;;
+        open)
+            openCallLogs
+        ;;
+        code)
+            code "${CALLLOGDIR}"
+        ;;
+        debug)
+            set -x
+        ;;
+    esac
+done
