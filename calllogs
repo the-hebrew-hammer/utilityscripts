@@ -78,10 +78,10 @@ do
             openCallLogs
         ;;
         code)
-            code "${CALLLOGDIR}"
+            code ${CALLLOGDIR}
         ;;
         dir)
-            open CALLLOGDIR
+            open ${CALLLOGDIR}
         ;;
         debug)
             set -x
